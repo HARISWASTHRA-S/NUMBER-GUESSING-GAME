@@ -1,0 +1,117 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+public class NumberGuessingGameGUI extends JFrame {
+private JTextField inputField;
+private JButton guessButton, replayButton;
+private JLabel feedbackLabel, attemptsLabel, highScoreLabel, hintLabel;
+private int numberToGuess, attempts, highScore;
+private boolean gameOver;
+private Random random;
+public NumberGuessingGameGUI() {
+setTitle("Number Guessing Game");
+setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+setSize(400, 300);
+setLayout(new GridLayout(6, 1));
+random = new Random();
+highScore = Integer.MAX_VALUE;
+initializeGame();
+initializeUI();
+setVisible(true);
+}
+private void initializeGame() {
+int min = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter the minimum
+number:"));
+int max = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter the maximum
+number:"));
+numberToGuess = random.nextInt(max - min + 1) + min;
+attempts = 0;
+gameOver = false;
+}
+private void initializeUI() {
+highScoreLabel = new JLabel("High Score: " + (highScore == Integer.MAX_VALUE ?
+"None" : highScore + " attempts"));
+highScoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+add(highScoreLabel);
+feedbackLabel = new JLabel("Guess the number!");
+feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+add(feedbackLabel);
+inputField = new JTextField();
+add(inputField);
+guessButton = new JButton("Guess");
+add(guessButton);
+attemptsLabel = new JLabel("Attempts: 0");
+attemptsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+add(attemptsLabel);
+hintLabel = new JLabel("Hint: Make your guess!");
+hintLabel.setHorizontalAlignment(SwingConstants.CENTER);
+add(hintLabel);
+guessButton.addActionListener(new ActionListener() {
+@Override
+public void actionPerformed(ActionEvent e) {
+handleGuess();
+}
+});
+}
+private void handleGuess() {
+if (gameOver) return;
+String input = inputField.getText();
+try {
+int guess = Integer.parseInt(input);
+attempts++;
+attemptsLabel.setText("Attempts: " + attempts);
+if (guess < numberToGuess) {
+feedbackLabel.setText("Too low! Try again.");
+} else if (guess > numberToGuess) {
+feedbackLabel.setText("Too high! Try again.");
+} else {
+feedbackLabel.setText("Congratulations! You've guessed the correct number.");
+gameOver = true;
+updateHighScore();
+replayPrompt();
+}
+if (attempts % 3 == 0 && !gameOver) {
+provideHint();
+}
+} catch (NumberFormatException ex) {
+feedbackLabel.setText("Invalid input. Enter a number.");
+}
+}
+private void provideHint() {
+if (numberToGuess % 2 == 0) {
+hintLabel.setText("Hint: The number is even.");
+} else if (numberToGuess % 3 == 0) {
+hintLabel.setText("Hint: The number is divisible by 3.");
+} else {
+hintLabel.setText("Hint: The number is odd.");
+}
+}
+private void updateHighScore() {
+if (attempts < highScore) {
+highScore = attempts;
+highScoreLabel.setText("High Score: " + highScore + " attempts");
+}
+}
+private void replayPrompt() {
+int option = JOptionPane.showConfirmDialog(this, "Do you want to play again?", "Play
+Again", JOptionPane.YES_NO_OPTION);
+if (option == JOptionPane.YES_OPTION) {
+initializeGame();
+resetUI();
+} else {
+System.exit(0);
+}
+}
+private void resetUI() {
+feedbackLabel.setText("Guess the number!");
+attemptsLabel.setText("Attempts: 0");
+hintLabel.setText("Hint: Make your guess!");
+inputField.setText("");
+gameOver = false;
+}
+public static void main(String[] args) {
+SwingUtilities.invokeLater(() -> new NumberGuessingGameGUI());
+}
+}
